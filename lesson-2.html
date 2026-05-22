@@ -56,11 +56,60 @@
         .logo {
             font-size: 1.5rem;
             font-weight: 800;
-            margin-bottom: 3rem;
+            margin-bottom: 1rem;
             background: linear-gradient(135deg, #60a5fa, #a855f7);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             letter-spacing: -0.5px;
+        }
+
+        .lesson-switcher {
+            margin-bottom: 1.2rem;
+            padding: 0.9rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.02);
+        }
+        .lesson-switcher-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.14em;
+            color: var(--accent-amber);
+            font-weight: 800;
+            margin-bottom: 0.75rem;
+        }
+        .lesson-links {
+            display: grid;
+            gap: 0.5rem;
+        }
+        .lesson-link {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            padding: 0.7rem 0.85rem;
+            border-radius: 12px;
+            text-decoration: none;
+            color: var(--text-secondary);
+            border: 1px solid transparent;
+            background: rgba(255, 255, 255, 0.02);
+            transition: var(--transition-smooth);
+            font-size: 0.92rem;
+        }
+        .lesson-link:hover, .lesson-link.active {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+            border-color: var(--border-color);
+        }
+        .lesson-link.active {
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.18);
+        }
+        .lesson-link .lesson-no {
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            color: var(--accent-amber);
+            text-transform: uppercase;
         }
 
         .nav-links {
@@ -625,6 +674,15 @@
         <!-- Sidebar Navigation -->
         <nav class="sidebar">
             <div class="logo">V<span>ocal</span>L<span>ogic</span></div>
+
+            <div class="lesson-switcher">
+                <div class="lesson-switcher-label">회차 이동</div>
+                <div class="lesson-links">
+                    <a class="lesson-link" data-lesson-link href="lesson-1.html#sec-intro"><span>1회차</span><span class="lesson-no">START</span></a>
+                    <a class="lesson-link" data-lesson-link href="lesson-2.html#sec-intro"><span>2회차</span><span class="lesson-no">NOW</span></a>
+                    <a class="lesson-link" data-lesson-link href="lesson-3.html#overview"><span>3회차</span><span class="lesson-no">FINAL</span></a>
+                </div>
+            </div>
             <div class="nav-links">
                 <a href="#sec-intro" class="nav-item active">🏠 <span>Session Overview</span></a>
                 <a href="#sec-warmup" class="nav-item">🔥 <span>Warming up</span></a>
@@ -979,28 +1037,133 @@
         </main>
     </div>
 
-    <script>
-        function toggleWidget(element) {
-            if (!element.style.cursor || element.style.cursor !== 'default') {
-                element.classList.toggle('active');
-            }
+        <script>
+    const lessonLinks = Array.from(document.querySelectorAll('.lesson-link'));
+    const navLinks = Array.from(document.querySelectorAll('.nav-item'));
+    const sections = navLinks.map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+    const progressFill = document.getElementById('progressFill');
+    const progressText = document.getElementById('progressText');
+
+    function syncLessonSwitcher() {
+      const currentPage = location.pathname.split('/').pop() || 'lesson-2.html';
+      lessonLinks.forEach(link => {
+        const linkPage = link.getAttribute('href').split('#')[0];
+        link.classList.toggle('active', linkPage === currentPage);
+      });
+    }
+
+    function setActiveSection(sectionId) {
+      navLinks.forEach(link => link.classList.toggle('active', link.getAttribute('href') === '#' + sectionId));
+    }
+
+    function updateProgress(){
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const pct = max > 0 ? Math.round((window.scrollY / max) * 100) : 0;
+      progressFill.style.width = pct + '%';
+      progressText.textContent = pct + '%';
+    }
+
+    function syncFromHash(scrollIntoView = false) {
+      const sectionId = location.hash ? location.hash.replace('#', '') : (navLinks[0]?.getAttribute('href') || '#sec-intro').replace('#', '');
+      const target = document.getElementById(sectionId);
+      if (!target) return;
+      setActiveSection(sectionId);
+      if (scrollIntoView) target.scrollIntoView({ behavior: 'auto', block: 'start' });
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          setActiveSection(entry.target.id);
         }
+      });
+    }, { rootMargin: '-35% 0px -55% 0px', threshold: 0 });
+    sections.forEach(section => observer.observe(section));
+    window.addEventListener('scroll', updateProgress, { passive: true });
+    window.addEventListener('hashchange', () => syncFromHash(true));
+    updateProgress();
 
-        document.querySelectorAll('.nav-item').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                const targetElement = document.querySelector(targetId);
-                
-                window.scrollTo({
-                    top: targetElement.offsetTop - 50,
-                    behavior: 'smooth'
-                });
+    document.querySelectorAll('.acc-button').forEach(button => {
+      button.addEventListener('click', () => button.closest('.acc-item').classList.toggle('open'));
+    });
 
-                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
-                this.classList.add('active');
-            });
-        });
-    </script>
+    const sidebar = document.getElementById('sidebar');
+    const menuBtn = document.getElementById('menuBtn');
+    menuBtn?.addEventListener('click', () => sidebar.classList.toggle('open'));
+    navLinks.forEach(link => link.addEventListener('click', () => sidebar.classList.remove('open')));
+
+    syncLessonSwitcher();
+    syncFromHash(!!location.hash);
+
+    // 3방향 슬라이더 연동 로직
+    const powerSlider = document.getElementById('powerSlider');
+    const escapeSlider = document.getElementById('escapeSlider');
+    const registerSlider = document.getElementById('registerSlider');
+
+    const powerProgress = document.getElementById('powerProgress');
+    const escapeProgress = document.getElementById('escapeProgress');
+    const registerProgress = document.getElementById('registerProgress');
+
+    const powerPercent = document.getElementById('powerPercent');
+    const escapePercent = document.getElementById('escapePercent');
+    const registerPercent = document.getElementById('registerPercent');
+
+    const powerVal = document.getElementById('powerVal');
+    const escapeVal = document.getElementById('escapeVal');
+    const registerVal = document.getElementById('registerVal');
+    const totalPercent = document.getElementById('totalPercent');
+
+    function adjustSliders(changedSliderId) {
+      let p = Number(powerSlider.value);
+      let e = Number(escapeSlider.value);
+      let r = Number(registerSlider.value);
+
+      if (p > 60) p = 60;
+      if (e > 60) e = 60;
+      if (r > 100) r = 100;
+
+      let total = p + e + r;
+
+      if (total > 100) {
+        if (changedSliderId === 'power') {
+          p = 100 - (e + r);
+          if (p < 0) p = 0;
+          powerSlider.value = p;
+        } else if (changedSliderId === 'escape') {
+          e = 100 - (p + r);
+          if (e < 0) e = 0;
+          escapeSlider.value = e;
+        } else if (changedSliderId === 'register') {
+          r = 100 - (p + e);
+          if (r < 0) r = 0;
+          registerSlider.value = r;
+        }
+        total = p + e + r;
+      }
+
+      powerVal.textContent = p + '%';
+      escapeVal.textContent = e + '%';
+      registerVal.textContent = r + '%';
+
+      powerPercent.textContent = p + '%';
+      escapePercent.textContent = e + '%';
+      registerPercent.textContent = r + '%';
+
+      if (totalPercent) {
+        totalPercent.textContent = total + '%';
+        totalPercent.style.color = total === 100 ? 'var(--green)' : 'var(--cyan)';
+      }
+
+      powerProgress.style.width = p + '%';
+      escapeProgress.style.width = e + '%';
+      registerProgress.style.width = r + '%';
+    }
+
+    powerSlider.addEventListener('input', () => adjustSliders('power'));
+    escapeSlider.addEventListener('input', () => adjustSliders('escape'));
+    registerSlider.addEventListener('input', () => adjustSliders('register'));
+
+    adjustSliders('register');
+  </script>
 </body>
 </html>

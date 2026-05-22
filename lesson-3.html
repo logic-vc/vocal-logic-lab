@@ -86,6 +86,13 @@
     .brand-title span { background: linear-gradient(135deg, #a78bfa, #22d3ee); -webkit-background-clip: text; color: transparent; }
     .brand-meta { font-size: 13px; color: var(--muted); }
 
+    .lesson-switcher { border: 1px solid var(--border); background: rgba(255,255,255,.04); border-radius: 18px; padding: 14px; }
+    .lesson-switcher-label { font-size: 11px; color: var(--subtle); letter-spacing: .12em; text-transform: uppercase; font-weight: 900; margin-bottom: 8px; }
+    .lesson-links { display: grid; gap: 5px; }
+    .lesson-link { display: flex; align-items: center; justify-content: space-between; gap: 10px; width: 100%; text-decoration: none; color: var(--muted); padding: 10px 10px; border-radius: 13px; border: 1px solid transparent; transition: var(--smooth); font-size: 14px; line-height: 1.25; background: rgba(255,255,255,.02); }
+    .lesson-link:hover, .lesson-link.active { color: var(--text); background: rgba(255,255,255,.07); border-color: var(--border); }
+    .lesson-link .lesson-no { font-size: 11px; font-weight: 900; letter-spacing: .12em; color: var(--amber); text-transform: uppercase; }
+
     .progress-shell { border: 1px solid var(--border); background: rgba(255,255,255,.045); padding: 12px; border-radius: 16px; }
     .progress-label { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; color: var(--muted); margin-bottom: 9px; }
     .progress-bar { height: 7px; border-radius: 999px; overflow: hidden; background: rgba(255,255,255,.08); }
@@ -297,6 +304,15 @@
       <div class="brand-kicker">Vocal Logic Lab</div>
       <div class="brand-title">Session 03<br><span>Passaggio</span></div>
       <div class="brand-meta">성구전환 · 기어 변속 · 깊이 유지</div>
+    </div>
+
+    <div class="lesson-switcher">
+      <div class="lesson-switcher-label">회차 이동</div>
+      <div class="lesson-links">
+        <a class="lesson-link" data-lesson-link href="lesson-1.html#sec-intro"><span>1회차</span><span class="lesson-no">START</span></a>
+        <a class="lesson-link" data-lesson-link href="lesson-2.html#sec-intro"><span>2회차</span><span class="lesson-no">NEXT</span></a>
+        <a class="lesson-link" data-lesson-link href="lesson-3.html#overview"><span>3회차</span><span class="lesson-no">NOW</span></a>
+      </div>
     </div>
     <div class="progress-shell">
       <div class="progress-label"><span>Dashboard Progress</span><b id="progressText">0%</b></div>
@@ -593,11 +609,24 @@
     </section>
   </main>
 
-  <script>
+    <script>
+    const lessonLinks = Array.from(document.querySelectorAll('.lesson-link'));
     const navLinks = Array.from(document.querySelectorAll('.nav-link'));
     const sections = navLinks.map(link => document.querySelector(link.getAttribute('href'))).filter(Boolean);
     const progressFill = document.getElementById('progressFill');
     const progressText = document.getElementById('progressText');
+
+    function syncLessonSwitcher() {
+      const currentPage = location.pathname.split('/').pop() || 'lesson-3.html';
+      lessonLinks.forEach(link => {
+        const linkPage = link.getAttribute('href').split('#')[0];
+        link.classList.toggle('active', linkPage === currentPage);
+      });
+    }
+
+    function setActiveSection(sectionId) {
+      navLinks.forEach(link => link.classList.toggle('active', link.getAttribute('href') === '#' + sectionId));
+    }
 
     function updateProgress(){
       const max = document.documentElement.scrollHeight - window.innerHeight;
@@ -606,15 +635,24 @@
       progressText.textContent = pct + '%';
     }
 
+    function syncFromHash(scrollIntoView = false) {
+      const sectionId = location.hash ? location.hash.replace('#', '') : (navLinks[0]?.getAttribute('href') || '#overview').replace('#', '');
+      const target = document.getElementById(sectionId);
+      if (!target) return;
+      setActiveSection(sectionId);
+      if (scrollIntoView) target.scrollIntoView({ behavior: 'auto', block: 'start' });
+    }
+
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
         if(entry.isIntersecting){
-          navLinks.forEach(link => link.classList.toggle('active', link.getAttribute('href') === '#' + entry.target.id));
+          setActiveSection(entry.target.id);
         }
       });
     }, { rootMargin: '-35% 0px -55% 0px', threshold: 0 });
     sections.forEach(section => observer.observe(section));
     window.addEventListener('scroll', updateProgress, { passive: true });
+    window.addEventListener('hashchange', () => syncFromHash(true));
     updateProgress();
 
     document.querySelectorAll('.acc-button').forEach(button => {
@@ -625,6 +663,9 @@
     const menuBtn = document.getElementById('menuBtn');
     menuBtn?.addEventListener('click', () => sidebar.classList.toggle('open'));
     navLinks.forEach(link => link.addEventListener('click', () => sidebar.classList.remove('open')));
+
+    syncLessonSwitcher();
+    syncFromHash(!!location.hash);
 
     // 3방향 슬라이더 연동 로직
     const powerSlider = document.getElementById('powerSlider');
@@ -649,14 +690,12 @@
       let e = Number(escapeSlider.value);
       let r = Number(registerSlider.value);
 
-      // 개별 한도 강제 보정 (HTML에서도 min/max가 있지만 스크립트 안정성 확보)
       if (p > 60) p = 60;
       if (e > 60) e = 60;
       if (r > 100) r = 100;
 
       let total = p + e + r;
 
-      // 총합이 100을 초과하면 조절한 슬라이더의 값을 줄여서 100을 절대 넘지 않게 함
       if (total > 100) {
         if (changedSliderId === 'power') {
           p = 100 - (e + r);
@@ -674,7 +713,6 @@
         total = p + e + r;
       }
 
-      // UI 및 텍스트 동적 업데이트
       powerVal.textContent = p + '%';
       escapeVal.textContent = e + '%';
       registerVal.textContent = r + '%';
@@ -685,14 +723,9 @@
 
       if (totalPercent) {
         totalPercent.textContent = total + '%';
-        if (total === 100) {
-          totalPercent.style.color = 'var(--green)';
-        } else {
-          totalPercent.style.color = 'var(--cyan)';
-        }
+        totalPercent.style.color = total === 100 ? 'var(--green)' : 'var(--cyan)';
       }
 
-      // 각 슬라이더 자체의 수치가 Stacked Progress Bar의 width%가 됨 (합이 최대 100이므로)
       powerProgress.style.width = p + '%';
       escapeProgress.style.width = e + '%';
       registerProgress.style.width = r + '%';
@@ -702,7 +735,6 @@
     escapeSlider.addEventListener('input', () => adjustSliders('escape'));
     registerSlider.addEventListener('input', () => adjustSliders('register'));
 
-    // 초기 실행
     adjustSliders('register');
   </script>
 </body></html>

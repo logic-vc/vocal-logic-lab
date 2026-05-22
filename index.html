@@ -3,102 +3,166 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>보컬로직랩 | 메인 페이지</title>
+  <title>보컬로직 랩</title>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" />
   <link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.8/dist/web/static/pretendard.css" rel="stylesheet" />
   <style>
     :root {
-      --bg: #070b16;
-      --panel: rgba(17, 24, 39, 0.86);
-      --panel-2: rgba(15, 23, 42, 0.88);
+      --bg: #060913;
+      --panel: rgba(12, 18, 34, .78);
+      --panel-2: rgba(18, 26, 48, .72);
       --line: rgba(255,255,255,.09);
-      --text: #f8fbff;
-      --muted: #9aa7c7;
+      --text: #f7f9ff;
+      --muted: #a5b0d1;
       --accent: #7c9cff;
       --accent-2: #62e0b5;
       --accent-3: #ffb86b;
-      --shadow: 0 28px 80px rgba(0,0,0,.38);
-      --radius-xl: 28px;
-      --radius-lg: 22px;
-      --radius-md: 16px;
-      --radius-sm: 12px;
+      --shadow: 0 30px 100px rgba(0,0,0,.42);
+      --radius-xl: 30px;
+      --radius-lg: 24px;
+      --radius-md: 18px;
       --font: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
     }
+
     * { box-sizing: border-box; }
     html { scroll-behavior: smooth; }
     body {
       margin: 0;
       font-family: var(--font);
-      background:
-        radial-gradient(circle at 12% 10%, rgba(124,156,255,.20), transparent 28%),
-        radial-gradient(circle at 88% 0%, rgba(98,224,181,.14), transparent 22%),
-        linear-gradient(180deg, #050812 0%, #070b16 100%);
       color: var(--text);
+      background:
+        radial-gradient(circle at 10% 8%, rgba(124,156,255,.26), transparent 28%),
+        radial-gradient(circle at 90% 2%, rgba(98,224,181,.18), transparent 24%),
+        radial-gradient(circle at 75% 88%, rgba(255,184,107,.12), transparent 22%),
+        linear-gradient(180deg, #04060d 0%, var(--bg) 100%);
       line-height: 1.6;
     }
+
     a { color: inherit; text-decoration: none; }
-    .wrap { max-width: 1280px; margin: 0 auto; padding: 28px 20px 44px; }
-    .hero {
-      display: grid;
-      grid-template-columns: 1.25fr .75fr;
-      gap: 18px;
-      align-items: stretch;
-      margin-bottom: 18px;
-    }
+    .wrap { max-width: 1320px; margin: 0 auto; padding: 28px 20px 44px; }
     .card {
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
       border: 1px solid var(--line);
       border-radius: var(--radius-xl);
+      background: linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.025));
       box-shadow: var(--shadow);
+      backdrop-filter: blur(16px);
       overflow: hidden;
-      backdrop-filter: blur(14px);
     }
-    .hero-main { padding: 28px; }
+
+    .hero {
+      position: relative;
+      min-height: 420px;
+      padding: 34px;
+      display: grid;
+      align-items: end;
+      overflow: hidden;
+    }
+    .hero::before,
+    .hero::after {
+      content: '';
+      position: absolute;
+      inset: auto;
+      border-radius: 999px;
+      filter: blur(10px);
+      pointer-events: none;
+    }
+    .hero::before {
+      width: 360px;
+      height: 360px;
+      right: -70px;
+      top: -90px;
+      background: radial-gradient(circle, rgba(124,156,255,.45), rgba(124,156,255,.05) 68%, transparent 75%);
+      opacity: .55;
+    }
+    .hero::after {
+      width: 260px;
+      height: 260px;
+      left: -60px;
+      bottom: -90px;
+      background: radial-gradient(circle, rgba(98,224,181,.38), rgba(98,224,181,.04) 68%, transparent 75%);
+      opacity: .5;
+    }
+
+    .hero-inner { position: relative; z-index: 1; max-width: 860px; }
     .eyebrow {
       display: inline-flex;
       align-items: center;
       gap: 8px;
       padding: 8px 12px;
       border-radius: 999px;
-      background: rgba(124,156,255,.14);
-      border: 1px solid rgba(124,156,255,.18);
-      color: #dfe6ff;
+      border: 1px solid rgba(124,156,255,.22);
+      background: rgba(124,156,255,.13);
+      color: #e4eaff;
       font-size: 13px;
       letter-spacing: .02em;
-      margin-bottom: 14px;
+      margin-bottom: 18px;
     }
-    h1 { margin: 0 0 10px; font-size: 38px; line-height: 1.1; letter-spacing: -0.03em; }
-    .subtitle { margin: 0; color: var(--muted); font-size: 15px; max-width: 68ch; }
-    .hero-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+    .hero h1 {
+      margin: 0;
+      font-size: clamp(42px, 7vw, 88px);
+      line-height: .95;
+      letter-spacing: -0.06em;
+      font-weight: 900;
+      text-shadow: 0 14px 40px rgba(0,0,0,.35);
+    }
+    .hero-copy {
+      margin: 16px 0 0;
+      max-width: 42rem;
+      color: rgba(237,243,255,.82);
+      font-size: 16px;
+    }
+    .hero-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 24px;
+    }
     .chip {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 8px 12px;
+      gap: 8px;
+      padding: 9px 13px;
       border-radius: 999px;
-      background: rgba(255,255,255,.04);
       border: 1px solid var(--line);
-      color: #dbe3ff;
+      background: rgba(255,255,255,.04);
+      color: #dce4ff;
       font-size: 13px;
     }
-    .hero-side { padding: 18px; display: grid; gap: 12px; align-content: start; }
-    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    .stat {
-      padding: 16px;
-      border-radius: var(--radius-md);
+    .chip::before {
+      content: '';
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--accent-2);
+      box-shadow: 0 0 0 4px rgba(98,224,181,.12);
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 28px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 12px 16px;
+      border-radius: 999px;
       border: 1px solid var(--line);
-      background: rgba(255,255,255,.03);
+      background: rgba(255,255,255,.04);
+      color: var(--text);
+      font-size: 14px;
+      font-weight: 800;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
     }
-    .stat .label { font-size: 12px; color: var(--muted); margin-bottom: 6px; }
-    .stat .value { font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
-    .stat .hint { margin-top: 6px; font-size: 12px; color: var(--muted); }
-    .quote {
-      padding: 18px;
-      border-radius: var(--radius-md);
-      border: 1px solid rgba(98,224,181,.18);
-      background: linear-gradient(180deg, rgba(98,224,181,.09), rgba(255,255,255,.03));
+    .btn:hover { transform: translateY(-1px); border-color: rgba(124,156,255,.38); background: rgba(124,156,255,.12); }
+    .btn.primary {
+      border-color: rgba(124,156,255,.35);
+      background: linear-gradient(180deg, rgba(124,156,255,.28), rgba(124,156,255,.12));
+      box-shadow: 0 12px 30px rgba(124,156,255,.12);
     }
-    .quote strong { display: block; margin-bottom: 8px; color: #dbfff1; }
+
     .section { margin-top: 18px; }
     .section-header {
       display: flex;
@@ -106,29 +170,31 @@
       align-items: end;
       gap: 12px;
       margin-bottom: 12px;
+      padding: 0 4px;
     }
-    .section-header h2 { margin: 0; font-size: 20px; letter-spacing: -0.02em; }
+    .section-header h2 { margin: 0; font-size: 20px; letter-spacing: -0.03em; }
     .section-header p { margin: 0; color: var(--muted); font-size: 13px; }
+
     .lesson-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 14px;
     }
     .lesson {
-      padding: 18px;
-      min-height: 240px;
+      min-height: 250px;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       border-radius: var(--radius-lg);
       border: 1px solid var(--line);
-      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
-      transition: transform .22s ease, border-color .22s ease, background .22s ease;
+      background: linear-gradient(180deg, rgba(255,255,255,.055), rgba(255,255,255,.025));
+      transition: transform .2s ease, border-color .2s ease, background .2s ease;
     }
     .lesson:hover {
       transform: translateY(-3px);
-      border-color: rgba(124,156,255,.30);
-      background: linear-gradient(180deg, rgba(124,156,255,.08), rgba(255,255,255,.03));
+      border-color: rgba(124,156,255,.34);
+      background: linear-gradient(180deg, rgba(124,156,255,.1), rgba(255,255,255,.03));
     }
     .lesson-top { display: grid; gap: 10px; }
     .badge {
@@ -142,7 +208,7 @@
       color: #dbe3ff;
       background: rgba(255,255,255,.03);
     }
-    .lesson h3 { margin: 0; font-size: 20px; line-height: 1.2; letter-spacing: -0.03em; }
+    .lesson h3 { margin: 0; font-size: 21px; line-height: 1.15; letter-spacing: -0.04em; }
     .lesson p { margin: 0; color: var(--muted); font-size: 13px; }
     .lesson-list { display: grid; gap: 8px; margin-top: 6px; }
     .lesson-list span {
@@ -158,131 +224,50 @@
       font-size: 18px;
       line-height: 1;
     }
-    .actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      padding: 10px 14px;
-      border-radius: 999px;
-      border: 1px solid var(--line);
-      font-size: 13px;
-      font-weight: 700;
-      transition: transform .2s ease, border-color .2s ease, background .2s ease;
-      background: rgba(255,255,255,.03);
-      color: var(--text);
-    }
-    .btn:hover { transform: translateY(-1px); border-color: rgba(124,156,255,.35); background: rgba(124,156,255,.10); }
-    .btn.primary { background: linear-gradient(180deg, rgba(124,156,255,.24), rgba(124,156,255,.12)); border-color: rgba(124,156,255,.35); }
-    .guide {
-      display: grid;
-      grid-template-columns: 1.15fr .85fr;
-      gap: 14px;
-      margin-top: 14px;
-    }
-    .panel {
-      padding: 18px;
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.03);
-    }
-    .panel h3 { margin: 0 0 10px; font-size: 18px; }
-    .timeline { display: grid; gap: 10px; }
-    .step {
-      display: grid;
-      grid-template-columns: 82px 1fr;
-      gap: 12px;
-      padding: 12px 14px;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.02);
-    }
-    .step .time { color: #cfd8ff; font-weight: 800; }
-    .step .desc { color: var(--muted); font-size: 13px; }
-    .linklist { display: grid; gap: 10px; }
-    .linkitem {
-      padding: 12px 14px;
-      border-radius: var(--radius-md);
-      border: 1px solid var(--line);
-      background: rgba(255,255,255,.02);
-    }
-    .linkitem .title { font-weight: 800; margin-bottom: 4px; }
-    .linkitem .sub { color: var(--muted); font-size: 13px; }
-    .linkitem .href { color: #b6c7ff; font-size: 13px; word-break: break-all; margin-top: 6px; display: block; }
-    .footer {
-      margin-top: 18px;
-      padding: 16px 18px;
-      text-align: center;
-      color: var(--muted);
-      font-size: 13px;
-    }
-    .small { font-size: 12px; color: var(--muted); }
+    .lesson .actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+
     @media (max-width: 1100px) {
-      .hero, .guide { grid-template-columns: 1fr; }
       .lesson-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .hero { min-height: 360px; }
     }
     @media (max-width: 720px) {
-      .wrap { padding: 18px 14px 36px; }
-      h1 { font-size: 30px; }
+      .wrap { padding: 18px 14px 34px; }
+      .hero { padding: 22px; min-height: 320px; }
+      .section-header { align-items: start; flex-direction: column; }
       .lesson-grid { grid-template-columns: 1fr; }
-      .stat-grid { grid-template-columns: 1fr; }
-      .step { grid-template-columns: 1fr; }
+      .hero-actions { gap: 8px; }
+      .btn { width: 100%; }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <section class="hero">
-      <div class="card hero-main">
-        <div class="eyebrow">보컬로직랩 · 교재 허브</div>
-        <h1>보컬로직랩 메인 페이지</h1>
-        <p class="subtitle">
-          학생들이 한 번에 들어와서 회차별 교재를 고를 수 있는 허브 페이지입니다.
-          1회차부터 4회차까지 연결하고, 각 회차 페이지는 같은 구조로 이어서 확장할 수 있게 만들었습니다.
+    <section class="card hero">
+      <div class="hero-inner">
+        <div class="eyebrow">보컬로직랩 · 회차별 교재 허브</div>
+        <h1>보컬로직 랩</h1>
+        <p class="hero-copy">
+          학생들이 들어오자마자 회차별 교재를 바로 선택할 수 있도록 만든 메인 허브입니다.
+          같은 폴더 안의 상대경로만 써서 로컬, GitHub, Vercel에서 모두 똑같이 열립니다.
         </p>
         <div class="hero-meta">
-          <span class="chip">HTML 교재</span>
-          <span class="chip">회차별 링크 허브</span>
-          <span class="chip">Vercel 배포용</span>
-          <span class="chip">Obsidian 원본 연동</span>
+          <span class="chip">1~4회차 교재 연결</span>
+          <span class="chip">정적 HTML</span>
+          <span class="chip">학생 공유용</span>
         </div>
-        <div class="actions">
-          <a class="btn primary" href="보컬로직랩_1회차_대시보드.html">1회차 바로 열기</a>
-          <a class="btn" href="보컬로직랩_3회차_대시보드.html">3회차 성구전환</a>
-          <a class="btn" href="보컬로직랩_4회차_노래적용_대시보드.html">4회차 노래적용</a>
+        <div class="hero-actions">
+          <a class="btn primary" href="보컬로직랩_1회차_대시보드.html">1회차 열기</a>
+          <a class="btn" href="보컬로직랩_3회차_대시보드.html">3회차 열기</a>
+          <a class="btn" href="보컬로직랩_4회차_노래적용_대시보드.html">4회차 열기</a>
         </div>
       </div>
-
-      <aside class="card hero-side">
-        <div class="stat-grid">
-          <div class="stat">
-            <div class="label">현재 구성</div>
-            <div class="value">4회차</div>
-            <div class="hint">1~4회차 링크 완성</div>
-          </div>
-          <div class="stat">
-            <div class="label">배포 방식</div>
-            <div class="value">Static</div>
-            <div class="hint">Vercel에 바로 올리기 좋음</div>
-          </div>
-        </div>
-        <div class="quote">
-          <strong>운영 기준</strong>
-          메인 페이지는 “학생이 바로 들어와서 회차를 고르는 화면”에 집중하고, 각 회차 페이지는 내용 전달에 집중합니다.
-        </div>
-        <div class="quote" style="border-color:rgba(124,156,255,.18);background:linear-gradient(180deg, rgba(124,156,255,.09), rgba(255,255,255,.03));">
-          <strong>링크 구조</strong>
-          같은 폴더 안의 상대경로만 사용해서 GitHub / Vercel / 로컬 모두에서 동일하게 열리도록 했습니다.
-        </div>
-      </aside>
     </section>
 
     <section class="section">
       <div class="section-header">
         <div>
           <h2>회차별 교재</h2>
-          <p>학생들이 순서대로 보거나, 필요한 회차만 바로 열 수 있게 구성했습니다.</p>
+          <p>필요한 회차만 바로 눌러서 들어가면 됩니다.</p>
         </div>
       </div>
 
@@ -291,7 +276,7 @@
           <div class="lesson-top">
             <span class="badge">1회차 · 호흡</span>
             <h3>호흡 세션</h3>
-            <p>첫 회차는 호흡과 지지의 감각을 만드는 출발점입니다.</p>
+            <p>호흡과 지지 감각을 만드는 첫 회차입니다.</p>
             <div class="lesson-list">
               <span>호흡 구조</span>
               <span>바닥감 / 지지</span>
@@ -352,56 +337,6 @@
         </article>
       </div>
     </section>
-
-    <section class="guide">
-      <div class="panel">
-        <h3>배포 흐름</h3>
-        <div class="timeline">
-          <div class="step">
-            <div class="time">1</div>
-            <div class="desc">이 폴더를 GitHub 저장소로 올린다.</div>
-          </div>
-          <div class="step">
-            <div class="time">2</div>
-            <div class="desc">Vercel에서 GitHub 저장소를 연결한다.</div>
-          </div>
-          <div class="step">
-            <div class="time">3</div>
-            <div class="desc">루트 `index.html`이 메인 랜딩이 되고, 회차별 페이지는 상대 링크로 열린다.</div>
-          </div>
-          <div class="step">
-            <div class="time">4</div>
-            <div class="desc">학생들에게는 Vercel 배포 링크만 전달하면 된다.</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="panel">
-        <h3>운영 메모</h3>
-        <div class="linklist">
-          <div class="linkitem">
-            <div class="title">Obsidian 원본</div>
-            <div class="sub">강의구축 폴더의 회차 자료를 기준으로 관리</div>
-            <span class="href">G:\내 드라이브\obsidian\secondbrain\30_Projects\Active\강의구축</span>
-          </div>
-          <div class="linkitem">
-            <div class="title">권장 공유 방식</div>
-            <div class="sub">메인 페이지 1개 + 회차별 교재 링크</div>
-            <span class="href">학생용: 메인 페이지 URL 하나만 전달</span>
-          </div>
-          <div class="linkitem">
-            <div class="title">다음 개선 포인트</div>
-            <div class="sub">수강생용 안내문, 회차별 요약, 강의 순서 가이드 추가 가능</div>
-            <span class="href">필요하면 다음 단계에서 더 다듬기</span>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <div class="footer card">
-      보컬로직랩 메인 페이지 · 학생용 교재 허브 · Vercel 배포용 정적 HTML
-      <div class="small" style="margin-top:6px;">1~4회차는 같은 폴더 안의 상대경로로 연결됩니다.</div>
-    </div>
   </div>
 </body>
 </html>

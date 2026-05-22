@@ -836,6 +836,54 @@
         .nav-indicator { opacity: 0; }
         .nav-item.active .nav-indicator { opacity: 1; }
 
+        /* Typography / spacing harmonized with Session 03 */
+        .hero h1,
+        .main-content > header h1,
+        .section-header h2,
+        .content-section h2 {
+            text-wrap: balance;
+            letter-spacing: -.045em;
+        }
+        .hero h1,
+        .main-content > header h1 {
+            font-size: clamp(42px, 5.8vw, 78px);
+            line-height: .95;
+            font-weight: 950;
+        }
+        .section-header h2,
+        .content-section h2 {
+            font-size: clamp(30px, 3.3vw, 46px);
+            line-height: 1.05;
+            font-weight: 950;
+        }
+        .hero p,
+        .header-desc,
+        .section-header p,
+        .glass-panel p,
+        .glass-panel li,
+        .widget-body p,
+        .widget-body li,
+        .content-section p,
+        .content-section li,
+        .content-section td,
+        .content-section th {
+            font-size: 16px;
+            line-height: 1.7;
+        }
+        .glass-panel,
+        .widget,
+        .highlight-box {
+            padding: 24px;
+        }
+        .section-header {
+            padding: 30px 30px 0;
+        }
+        .section-container { padding-bottom: 8px; }
+        .table-wrapper th,
+        .table-wrapper td {
+            font-size: 15px;
+        }
+
         @media (max-width: 1100px) {
             .sidebar {
                 position: static;

@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>보컬로직랩(Vocal Logic Lab) - 2회차 대시보드</title>
+    <style>
+        :root {
+            --bg-dark: #0f172a;
+            --bg-elevated: #1e293b;
+            --accent-blue: #3b82f6;
+            --accent-purple: #8b5cf6;
+            --accent-amber: #f59e0b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Layout Structure */
+        .dashboard-container {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Navigation */
+        .sidebar {
+            width: 280px;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(20px);
+            border-right: 1px solid var(--border-color);
+            padding: 2rem 1.5rem;
+            position: fixed;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 3rem;
+            background: linear-gradient(135deg, #60a5fa, #a855f7);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+        }
+
+        .nav-links {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius-sm);
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: var(--transition-smooth);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+            border-left: 3px solid var(--accent-blue);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            margin-left: 280px;
+            padding: 3rem 4rem;
+            max-width: 1200px;
+        }
+
+        header {
+            margin-bottom: 4rem;
+        }
+
+        .session-badge {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+            padding: 0.4rem 1rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 1rem;
+        }
+
+        h1 {
+            font-size: 2.75rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            margin-bottom: 1rem;
+        }
+
+        .header-desc {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            max-width: 700px;
+        }
+
+        /* Content Sections */
+        .content-section {
+            margin-bottom: 6rem;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 0.8s forwards;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        /* Interactive Card (Widget) */
+        .widget-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+        }
+
+        .widget {
+            background: var(--bg-elevated);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 2rem;
+            transition: var(--transition-smooth);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .widget:hover {
+            transform: translateY(-5px);
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+
+        .widget-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+        }
+
+        .widget-title {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .widget-icon {
+            width: 44px;
+            height: 44px;
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .widget-time {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .widget-body {
+            display: none;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .widget.active .widget-body {
+            display: block;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+
+        .widget-btn {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            transition: var(--transition-smooth);
+        }
+
+        .widget.active .widget-btn {
+            transform: rotate(180deg);
+        }
+
+        /* Glass Panel */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 2.5rem;
+            margin-top: 2rem;
+        }
+
+        .glass-panel h3 {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.4rem;
+        }
+
+        /* Table Style */
+        .table-wrapper {
+            margin: 2rem 0;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+
+        th, td {
+            padding: 1.2rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-blue);
+            font-weight: 600;
+        }
+
+        /* Highlight Box */
+        .highlight-box {
+            background: rgba(245, 158, 11, 0.05);
+            border-left: 4px solid var(--accent-amber);
+            padding: 1.5rem;
+            margin: 2rem 0;
+            border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        }
+
+        .highlight-box h4 {
+            color: var(--accent-amber);
+            margin-bottom: 0.5rem;
+        }
+
+        ul {
+            list-style-position: inside;
+            padding-left: 0.5rem;
+        }
+
+        li {
+            margin-bottom: 0.75rem;
+        }
+
+        strong {
+            color: var(--text-primary);
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar { width: 80px; padding: 2rem 0.5rem; align-items: center; }
+            .nav-item span, .logo span { display: none; }
+            .main-content { margin-left: 80px; padding: 2rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard-container">
+        <!-- Sidebar Navigation -->
+        <nav class="sidebar">
+            <div class="logo">V<span>ocal</span>L<span>ogic</span></div>
+            <div class="nav-links">
+                <a href="#sec-intro" class="nav-item active">🏠 <span>Session Overview</span></a>
+                <a href="#sec-warmup" class="nav-item">🔥 <span>Warming up</span></a>
+                <a href="#sec-theory-1" class="nav-item">⚙️ <span>소리의 압력</span></a>
+                <a href="#sec-theory-2" class="nav-item">💎 <span>밀도 vs 크기</span></a>
+                <a href="#sec-references" class="nav-item">🎞️ <span>레퍼런스 영상</span></a>
+                <a href="#sec-individual" class="nav-item">🧘 <span>개별 연습</span></a>
+                <a href="#sec-group" class="nav-item">👥 <span>공동 연습</span></a>
+                <a href="#sec-wrapup" class="nav-item">🏁 <span>Wrap-up</span></a>
+                <a href="#sec-homework" class="nav-item">📝 <span>기록 & 과제</span></a>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header id="sec-intro">
+                <span class="session-badge">Session 02</span>
+                <h1>소리의 밀도와 지탱 (Appoggio)</h1>
+                <p class="header-desc">단순히 '큰 소리'가 아닌, 작지만 단단하고 멀리 뻗어나가는 '깊은 소리'의 원리를 탐구합니다. 호흡의 압력을 어떻게 목소리의 에너지로 전환하는지 몸으로 익히는 시간입니다.</p>
+            </header>
+
+            <!-- Section 1: Warming up -->
+            <section id="sec-warmup" class="content-section">
+                <div class="section-header">
+                    <h2>🔥 워밍업 & 리뷰</h2>
+                    <p>본격적인 시작에 앞서 몸과 호흡을 깨우고 에너지를 정렬합니다.</p>
+                </div>
+                <div class="glass-panel">
+                    <h3>훈련 순서</h3>
+                    <ul>
+                        <li><strong>흉복식 호흡 확인</strong> — 아래에서 위로 채워지는 감각, 횡격막의 반응을 다시 점검합니다.</li>
+                        <li><strong>립트릴(허밍)</strong> — 호흡의 압력을 가볍게 입술(코)로 보내며 성대를 풀어줍니다.</li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Section 2: Theory 1 -->
+            <section id="sec-theory-1" class="content-section">
+                <div class="section-header">
+                    <h2>⚙️ 핵심 원리 1: 소리의 압력과 지탱</h2>
+                </div>
+                
+                <div class="widget-grid">
+                    <div class="widget active" onclick="toggleWidget(this)">
+                        <div class="widget-header">
+                            <div class="widget-title">
+                                <div class="widget-icon">📐</div>
+                                <h4>발성 기어 모델 (Vocal Gear)</h4>
+                            </div>
+                            <div class="widget-btn">▼</div>
+                        </div>
+                        <div class="widget-body">
+                            <p>발성은 두 개의 기어가 맞물려 돌아가는 것과 같습니다.</p>
+                            <div class="table-wrapper">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>기어</th>
+                                            <th>역할</th>
+                                            <th>결과</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>동력 (호흡)</strong></td>
+                                            <td>횡격막과 복근을 통한 공기의 압축</td>
+                                            <td>엔진의 출력 (에너지원)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>저항 (성대)</strong></td>
+                                            <td>압축된 공기가 나가지 못하게 버팀</td>
+                                            <td>압력 형성 (폭발적인 잠재력)</td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong style="color:var(--accent-amber)">맞물림 (Appoggio)</strong></td>
+                                            <td>호흡의 압력을 성대가 적절한 간격으로 버텨줌</td>
+                                            <td>밀도 있고, 묵직하며, 멀리 뻗어나가는 소리</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: Theory 2 -->
+            <section id="sec-theory-2" class="content-section">
+                <div class="section-header">
+                    <h2>💎 핵심 원리 2: 소리의 밀도 vs 크기</h2>
+                </div>
+                <p>많은 사람들이 '파워풀한 노래'를 부르기 위해 무작정 소리를 지릅니다. 하지만 <strong>크게 내는 것과 깊게(밀도 있게) 내는 것은 다릅니다.</strong></p>
+
+                <div class="highlight-box">
+                    <h4>호스와 물의 비유</h4>
+                    <p style="margin:0;">호스로 물을 세게 멀리 쏘려면 수도꼭지를 무작정 끝까지 트는 것이 아닙니다. <strong>물의 출구를 손가락으로 좁히면</strong> 수압이 강해지며 멀리 나갑니다. 발성에서도 호흡을 많이 뱉어내는 게 아니라, 성대라는 출구에서 저항을 만들어 압력을 높이는 것이 핵심입니다.</p>
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>비교</th>
+                                <th>볼륨으로 크게 내기 (일회용 소리)</th>
+                                <th>압력으로 깊게 내기</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>공기 사용량</strong></td>
+                                <td>순간적으로 많은 공기가 소모됨</td>
+                                <td>적은 공기로도 오랫동안 효율적으로 사용</td>
+                            </tr>
+                            <tr>
+                                <td><strong>질감</strong></td>
+                                <td>크고 무겁고 센 소리</td>
+                                <td>단단하고, 꽉 차고, 차분하고 깊은 소리</td>
+                            </tr>
+                            <tr>
+                                <td><strong>지속력</strong></td>
+                                <td>금방 숨이 차고 목이 상하기 쉬움</td>
+                                <td>긴 프레이즈도 흔들림 없이 지탱 가능</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Section 4: Reference Videos -->
+            <section id="sec-references" class="content-section">
+                <div class="section-header">
+                    <h2>🎞️ 레퍼런스 영상 관찰</h2>
+                    <p>아티스트들의 깊은 소리를 확인해보세요.</p>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem; margin-top: 1.5rem;">
+                    <div style="background: var(--bg-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; padding: 1.5rem; transition: var(--transition-smooth);">
+                        <h4 style="margin-bottom: 1rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;"><span style="color: #ef4444;">▶</span> 폴킴 - 너를 만나 (Live)</h4>
+                        <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                            <iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" src="https://www.youtube-nocookie.com/embed/TJJRemIK53M" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                    
+                    <div style="background: var(--bg-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; padding: 1.5rem; transition: var(--transition-smooth);">
+                        <h4 style="margin-bottom: 1rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;"><span style="color: #ef4444;">▶</span> 박기영 - 비포애프터 (겨울비)</h4>
+                        <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                            <iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" src="https://www.youtube-nocookie.com/embed/fhGGIZ4eIKY?start=840" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                    </div>
+
+                    <div style="background: var(--bg-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; padding: 1.5rem; transition: var(--transition-smooth);">
+                        <h4 style="margin-bottom: 1rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;"><span style="color: #ef4444;">▶</span> 이상이 & 허성태 - Smile Boy</h4>
+                        <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                            <iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" src="https://www.youtube-nocookie.com/embed/6T55k4xXAoU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                    </div>
+
+                    <div style="background: var(--bg-elevated); border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; padding: 1.5rem; transition: var(--transition-smooth);">
+                        <h4 style="margin-bottom: 1rem; color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;"><span style="color: #ef4444;">▶</span> 아이유 - 깊은 소리 VS 샤한 소리</h4>
+                        <div style="position: relative; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 8px; border: 1px solid rgba(255,255,255,0.05);">
+                            <iframe style="position: absolute; top: 0; left: 0; width: 100%; height: 100%;" src="https://www.youtube-nocookie.com/embed/ViphfYUcj5Q" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 6: Individual Practice -->
+            <section id="sec-individual" class="content-section">
+                <div class="section-header">
+                    <h2>🧘 개별 연습 (자기 발견)</h2>
+                    <p>내 몸이 만들어내는 압력과 저항의 감각을 직접 실험해 봅니다.</p>
+                </div>
+
+                <div class="widget-grid">
+                    <div class="widget" onclick="toggleWidget(this)">
+                        <div class="widget-header">
+                            <div class="widget-title">
+                                <div class="widget-icon">👄</div>
+                                <div>
+                                    <h4>A. 성문 저항 감각 찾기</h4>
+                                    <span class="widget-time">3분 소요</span>
+                                </div>
+                            </div>
+                            <div class="widget-btn">▼</div>
+                        </div>
+                        <div class="widget-body">
+                            <ul>
+                                <li>① 숨이 많이 새는 소리 ("흐~아")</li>
+                                <li>② 힘주어 쥐어짜는 소리 ("윽-아")</li>
+                                <li>③ 부드럽게 성대가 맞물리며 선명하게 나는 소리 ("아~")</li>
+                                <li>세 가지를 번갈아 내보며 성대가 열리고 닫히는 느낌의 차이를 스스로 감각해봅니다.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="widget" onclick="toggleWidget(this)">
+                        <div class="widget-header">
+                            <div class="widget-title">
+                                <div class="widget-icon">🔊</div>
+                                <div>
+                                    <h4>B. 말 소리 VS 노래소리 비교</h4>
+                                    <span class="widget-time">5분 소요</span>
+                                </div>
+                            </div>
+                            <div class="widget-btn">▼</div>
+                        </div>
+                        <div class="widget-body">
+                            <ul>
+                                <li>① **평소 말할 때의 느낌**: 우리는 말할 때 보통 자연스러운 깊은 소리를 사용합니다. 그 편안한 감각을 확인하세요.</li>
+                                <li>② **저음 → 중고음**: 음정이 올라가면서 소리가 얇아지거나 '뜨지' 않는지, 말할 때의 깊이가 유지되는지 비교합니다.</li>
+                                <li>③ **노래할 때의 느낌**: 실제 노래 구절을 부를 때 말할 때의 텐션이 순식간에 사라지지는 않는지 감각해봅니다.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="widget" onclick="toggleWidget(this)">
+                        <div class="widget-header">
+                            <div class="widget-title">
+                                <div class="widget-icon">🎙️</div>
+                                <div>
+                                    <h4>C. 가수 소리와 나의 소리 비교</h4>
+                                    <span class="widget-time">5분 소요</span>
+                                </div>
+                            </div>
+                            <div class="widget-btn">▼</div>
+                        </div>
+                        <div class="widget-body">
+                            <ul>
+                                <li>레퍼런스 영상 속 가수의 소리를 따라해보면서 차이점을 느껴봅니다.</li>
+                                <li>가수는 소리를 안쪽에서 어떻게 '지탱'하고 있는지 관찰하며 그 텐션을 모사해보세요.</li>
+                                <li>나의 소리가 가수처럼 단단하게 채워지는지, 아니면 가볍게 흩어지는지 비교해봅니다.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 7: Group Practice -->
+            <section id="sec-group" class="content-section">
+                <div class="section-header">
+                    <h2>👥 공동 연습 (상호 피드백)</h2>
+                    <p>서로의 소리를 비교하며 '깊이'의 유무를 판단하고 개선 방향을 제시합니다.</p>
+                </div>
+
+                <div class="widget-grid" style="grid-template-columns: 1fr;">
+                    <div class="widget active" onclick="toggleWidget(this)">
+                        <div class="widget-header">
+                            <div class="widget-title">
+                                <div class="widget-icon" style="background: rgba(59, 130, 246, 0.1); color: #60a5fa; border-color: rgba(59, 130, 246, 0.3);">👀</div>
+                                <div>
+                                    <h4>탐구 과제: 소리 깊이 판별 및 가이드</h4>
+                                    <span class="widget-time">15분 (교대 진행)</span>
+                                </div>
+                            </div>
+                            <div class="widget-btn">▼</div>
+                        </div>
+                        <div class="widget-body">
+                            <p style="margin-bottom:1.5rem; font-weight:600; color:var(--accent-blue)">👉 개별 연습했던 소리를 파트너와 비교하며 서로의 '방향'을 잡아줍니다.</p>
+                            
+                            <div style="display:grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
+                                <div style="background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: var(--radius-sm);">
+                                    <h5 style="color:#a1a1aa; margin-bottom:1rem;">실행 가이드</h5>
+                                    <p>파트너에게 자신의 '말소리'와 '노랫소리'를 차례로 들려줍니다.</p>
+                                    <ul style="margin:0;">
+                                        <li>① 편하게 말할 때의 소리 들려주기</li>
+                                        <li>② 노래할 때(또는 발성 시)의 소리 들려주기</li>
+                                        <li>③ 가수를 따라 했던 깊은 소리 시도해보기</li>
+                                    </ul>
+                                </div>
+                                <div style="background: rgba(0,0,0,0.2); padding: 1.5rem; border-radius: var(--radius-sm);">
+                                    <h5 style="color:#a1a1aa; margin-bottom:1rem;">관찰자 피드백 (판단 및 제언)</h5>
+                                    <p>상대방의 소리를 듣고 '깊고 안 깊고'를 판단하여 알려줍니다.</p>
+                                    <ul style="margin:0;">
+                                        <li>**깊이 판별**: 소리에 단단한 알맹이가 있는가, 아니면 겉도는 소리인가?</li>
+                                        <li>**저항 체크**: 숨이 너무 많이 새어나오지는 않는가? (바람 세기 확인)</li>
+                                        <li>**방향 제시**: "방금 말할 때보다 소리가 너무 떴어요", "조금 더 안쪽으로 눌러보세요" 등 피드백.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="highlight-box" style="margin:0;">
+                                <h4>🗣️ 상호 피드백 포인트</h4>
+                                <p style="margin:0;">단순히 '좋다/나쁘다'가 아니라, **"말할 때의 그 묵직함이 노래할 때도 유지되는가?"**를 기준으로 서로의 방향을 점검합니다. 서로의 감각을 비교하며 방향을 잡아줍니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Wrap-up -->
+            <section id="sec-wrapup" class="content-section">
+                <div class="section-header">
+                    <h2>📖 마무리 강의</h2>
+                    <p>오늘의 발견을 하나로 엮고 다음 단계를 준비합니다.</p>
+                </div>
+
+                <div class="glass-panel" style="text-align: center; padding: 4rem 2rem;">
+                    <h3 style="justify-content: center; margin-top:0; font-size: 1.75rem;">발견의 연결: 소리의 밀도가 만들어지는 과정</h3>
+                    
+                    <div style="display: flex; justify-content: center; align-items: center; gap: 2rem; margin: 3rem 0; flex-wrap: wrap;">
+                        <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                            <h4 style="color:var(--text-primary); font-size: 1.1rem;">흉복식 호흡</h4>
+                            <span style="color:var(--text-secondary); font-size:0.85rem;">안정적인 동력(공기) 확보</span>
+                        </div>
+                        <span style="color:var(--accent-amber); font-size: 1.5rem;">➔</span>
+                        <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(245,158,11,0.3); box-shadow: 0 0 20px rgba(245,158,11,0.1);">
+                            <h4 style="color:var(--accent-amber); font-size: 1.25rem;">기어 체결 (Appoggio)</h4>
+                            <span style="color:var(--text-secondary); font-size:0.9rem;">호흡 압력과 성문 저항의 팽팽한 균형</span>
+                        </div>
+                        <span style="color:var(--accent-amber); font-size: 1.5rem;">➔</span>
+                        <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+                            <h4 style="color:var(--text-primary); font-size: 1.1rem;">밀도 있는 소리</h4>
+                            <span style="color:var(--text-secondary); font-size:0.85rem;">크지 않아도 단단하고 멀리 가는 소리</span>
+                        </div>
+                    </div>
+
+                    <div style="text-align: left; background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: var(--radius-md); border-left: 4px solid var(--accent-blue);">
+                        <h5 style="color: var(--accent-blue); font-size: 1.1rem; margin-bottom: 0.5rem;">🧠 깊이와 지탱의 감각 체화</h5>
+                        <p style="color: var(--text-secondary); margin: 0; font-size: 0.95rem;">오늘 알게 된 'Appoggio(아포지오)'는 하루아침에 완성되지 않습니다. 무작정 목으로 질러서 볼륨을 키우던 습관을 버리고, 호흡과 성대가 맞물려 돌아가는 텐션, 압력을 몸이 기억하도록 꾸준히 반복해야 합니다. 이 튼튼한 기어가 체결되어야 고음으로 부드럽게 올라갈 수 있습니다.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section: Homework -->
+            <section id="sec-homework" class="content-section">
+                <div class="section-header">
+                    <h2>📝 기록 & 과제</h2>
+                    <p>오늘 탐구한 감각을 잊지 않게 기록하고, 주간 훈련으로 이어갑니다.</p>
+                </div>
+
+                <div class="widget-grid">
+                    <div class="widget active" style="cursor: default; border-color: var(--accent-purple); background: rgba(139, 92, 246, 0.05);">
+                        <div class="widget-header">
+                            <div class="widget-title">
+                                <div class="widget-icon" style="background: rgba(139, 92, 246, 0.1); color: #a78bfa; border-color: rgba(139, 92, 246, 0.3);">📅</div>
+                                <h4>이번 주 미션</h4>
+                            </div>
+                        </div>
+                        <div class="widget-body" style="padding-top: 1.5rem;">
+                            <ul>
+                                <li><strong style="color:var(--text-primary)">과제 1: 텐션 적용 녹음</strong><br>
+                                평소 '샤하게, 부드럽게 내던 구간, 소리가 뜨던 구간'을 오늘 배운 깊은 소리로 접근해 불러보고 녹음해봅니다.</li>
+                                <li style="margin-top: 1rem;"><strong style="color:var(--text-primary)">과제 2: 저항감 훈련 (매일 5분)</strong><br>
+                                저항감을 느끼면서 호흡이 남지 않는 소리를 내고 감각해보세요.</li>
+                                <li style="margin-top: 1rem;"><strong style="color:var(--text-primary)">과제 3: 발견 공유</strong><br>
+                                연습하면서 느낀 가장 큰 차이점 한 줄을 이번 주 내로 카톡 단톡방에 공유해주세요.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        function toggleWidget(element) {
+            if (!element.style.cursor || element.style.cursor !== 'default') {
+                element.classList.toggle('active');
+            }
+        }
+
+        document.querySelectorAll('.nav-item').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                window.scrollTo({
+                    top: targetElement.offsetTop - 50,
+                    behavior: 'smooth'
+                });
+
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

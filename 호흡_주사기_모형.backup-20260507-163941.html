@@ -1,0 +1,493 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>호흡 주사기 모형 — 흉곽과 횡격막</title>
+<style>
+  :root {
+    --bg: #09090b;
+    --panel: rgba(24, 24, 27, .82);
+    --line: rgba(255,255,255,.16);
+    --text: #f8fafc;
+    --muted: #a1a1aa;
+    --blue: #60a5fa;
+    --amber: #f59e0b;
+    --green: #34d399;
+    --red: #f87171;
+    --barrel: rgba(96, 165, 250, .13);
+    --barrel-strong: rgba(96, 165, 250, .35);
+    --air: rgba(52, 211, 153, .22);
+    --air-strong: rgba(52, 211, 153, .45);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 20% 10%, rgba(96, 165, 250, .18), transparent 34%),
+      radial-gradient(circle at 80% 15%, rgba(245, 158, 11, .14), transparent 30%),
+      linear-gradient(135deg, #09090b 0%, #111827 50%, #0f172a 100%);
+    color: var(--text);
+    font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    padding: 32px;
+  }
+
+  .wrap {
+    max-width: 1180px;
+    margin: 0 auto;
+  }
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    margin-bottom: 24px;
+  }
+
+  .eyebrow {
+    color: var(--amber);
+    font-weight: 800;
+    letter-spacing: .14em;
+    font-size: 13px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  h1 {
+    margin: 0;
+    font-size: clamp(34px, 5vw, 64px);
+    letter-spacing: -0.06em;
+    line-height: .95;
+  }
+
+  .lead {
+    max-width: 520px;
+    color: #cbd5e1;
+    font-size: 17px;
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  .board {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(320px, .8fr);
+    gap: 22px;
+  }
+
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 28px;
+    box-shadow: 0 24px 80px rgba(0,0,0,.34);
+    backdrop-filter: blur(18px);
+  }
+
+  .model-card {
+    padding: 26px;
+    min-height: 620px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .model-stage {
+    height: 520px;
+    position: relative;
+    display: grid;
+    place-items: center;
+  }
+
+  .syringe {
+    width: min(92%, 760px);
+    height: 260px;
+    position: relative;
+    transform: translateY(10px);
+  }
+
+  .barrel {
+    position: absolute;
+    left: 110px;
+    right: 95px;
+    top: 58px;
+    height: 144px;
+    border: 3px solid var(--barrel-strong);
+    border-radius: 26px;
+    background:
+      linear-gradient(90deg, transparent 0 9%, rgba(255,255,255,.04) 9% 10%, transparent 10% 19%, rgba(255,255,255,.04) 19% 20%, transparent 20% 29%, rgba(255,255,255,.04) 29% 30%, transparent 30% 39%, rgba(255,255,255,.04) 39% 40%, transparent 40% 49%, rgba(255,255,255,.04) 49% 50%, transparent 50% 59%, rgba(255,255,255,.04) 59% 60%, transparent 60% 69%, rgba(255,255,255,.04) 69% 70%, transparent 70% 79%, rgba(255,255,255,.04) 79% 80%, transparent 80% 89%, rgba(255,255,255,.04) 89% 90%, transparent 90%),
+      var(--barrel);
+    overflow: hidden;
+  }
+
+  .air {
+    position: absolute;
+    right: 0;
+    top: 0;
+    height: 100%;
+    width: var(--air-width, 68%);
+    background: linear-gradient(90deg, rgba(52,211,153,.04), var(--air), var(--air-strong));
+    border-left: 1px solid rgba(52,211,153,.3);
+    transition: width .7s cubic-bezier(.2,.8,.2,1);
+  }
+
+  .air::before {
+    content: "공기 공간";
+    position: absolute;
+    right: 22px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #d1fae5;
+    font-weight: 800;
+    letter-spacing: -.02em;
+  }
+
+  .piston {
+    position: absolute;
+    top: 39px;
+    left: var(--piston-left, 220px);
+    width: 34px;
+    height: 184px;
+    background: linear-gradient(180deg, #fbbf24, #f59e0b);
+    border-radius: 12px;
+    box-shadow: 0 0 0 8px rgba(245,158,11,.14), 0 18px 40px rgba(245,158,11,.2);
+    transition: left .7s cubic-bezier(.2,.8,.2,1);
+    z-index: 3;
+  }
+
+  .rod {
+    position: absolute;
+    top: 123px;
+    left: 0;
+    width: var(--rod-width, 232px);
+    height: 18px;
+    background: linear-gradient(90deg, rgba(245,158,11,.35), #f59e0b);
+    border-radius: 999px;
+    transition: width .7s cubic-bezier(.2,.8,.2,1);
+    z-index: 2;
+  }
+
+  .handle {
+    position: absolute;
+    left: 0;
+    top: 86px;
+    width: 34px;
+    height: 92px;
+    border-radius: 12px;
+    background: rgba(245,158,11,.22);
+    border: 2px solid rgba(245,158,11,.55);
+  }
+
+  .nozzle {
+    position: absolute;
+    right: 32px;
+    top: 106px;
+    width: 70px;
+    height: 50px;
+    border-radius: 0 18px 18px 0;
+    border: 3px solid var(--barrel-strong);
+    border-left: 0;
+    background: rgba(96,165,250,.1);
+  }
+
+  .mouth {
+    position: absolute;
+    right: 0;
+    top: 119px;
+    width: 38px;
+    height: 24px;
+    border-radius: 0 999px 999px 0;
+    background: rgba(248,250,252,.2);
+    border: 2px solid rgba(248,250,252,.28);
+  }
+
+  .flow {
+    position: absolute;
+    right: -10px;
+    top: 76px;
+    width: 120px;
+    color: var(--green);
+    opacity: var(--flow-opacity, .45);
+    transition: opacity .5s ease;
+  }
+
+  .flow span {
+    display: block;
+    height: 2px;
+    margin: 18px 0;
+    background: linear-gradient(90deg, var(--green), transparent);
+    border-radius: 999px;
+    animation: flow 1.5s linear infinite;
+  }
+
+  .flow span:nth-child(2) { width: 88px; animation-delay: .15s; }
+  .flow span:nth-child(3) { width: 64px; animation-delay: .3s; }
+
+  @keyframes flow {
+    from { transform: translateX(0); opacity: .1; }
+    35% { opacity: 1; }
+    to { transform: translateX(42px); opacity: 0; }
+  }
+
+  .label {
+    position: absolute;
+    padding: 10px 12px;
+    border-radius: 14px;
+    background: rgba(0,0,0,.34);
+    border: 1px solid rgba(255,255,255,.12);
+    color: #e5e7eb;
+    font-size: 14px;
+    line-height: 1.25;
+  }
+
+  .label strong { display: block; color: #fff; font-size: 15px; margin-bottom: 3px; }
+  .label-barrel { left: 210px; top: 18px; }
+  .label-piston { left: var(--label-piston-left, 180px); bottom: 0; transition: left .7s cubic-bezier(.2,.8,.2,1); }
+  .label-air { right: 130px; bottom: 0; }
+  .label-nozzle { right: 0; top: 172px; }
+
+  .legend {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-top: 14px;
+  }
+
+  .legend-item {
+    border: 1px solid rgba(255,255,255,.1);
+    border-radius: 18px;
+    padding: 14px;
+    background: rgba(255,255,255,.04);
+  }
+
+  .legend-item b { display: block; margin-bottom: 6px; }
+  .legend-item p { margin: 0; color: var(--muted); font-size: 14px; line-height: 1.45; }
+
+  .side {
+    display: grid;
+    gap: 16px;
+  }
+
+  .panel { padding: 22px; }
+  .panel h2 { margin: 0 0 14px; font-size: 22px; letter-spacing: -.04em; }
+  .panel p, .panel li { color: #cbd5e1; line-height: 1.55; }
+  .panel ul { margin: 0; padding-left: 18px; }
+
+  .state {
+    border-left: 4px solid var(--green);
+    padding-left: 14px;
+  }
+
+  .state h3 { margin: 0 0 8px; font-size: 20px; }
+  .state p { margin: 0; }
+
+  .controls {
+    display: grid;
+    gap: 12px;
+  }
+
+  .buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  button {
+    min-height: 48px;
+    border: 1px solid rgba(255,255,255,.14);
+    border-radius: 16px;
+    color: #fff;
+    background: rgba(255,255,255,.06);
+    font-weight: 800;
+    cursor: pointer;
+  }
+
+  button.active {
+    background: linear-gradient(135deg, rgba(245,158,11,.26), rgba(96,165,250,.18));
+    border-color: rgba(245,158,11,.45);
+  }
+
+  input[type="range"] { width: 100%; accent-color: var(--amber); }
+
+  .note {
+    color: #94a3b8;
+    font-size: 14px;
+    margin: 10px 0 0;
+  }
+
+  .formula {
+    display: grid;
+    gap: 10px;
+  }
+
+  .formula-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: rgba(255,255,255,.04);
+    border: 1px solid rgba(255,255,255,.08);
+  }
+
+  .chip {
+    flex: 0 0 auto;
+    min-width: 82px;
+    text-align: center;
+    padding: 7px 10px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 900;
+    color: #0f172a;
+  }
+
+  .blue { background: #93c5fd; }
+  .amber { background: #fbbf24; }
+  .green { background: #86efac; }
+
+  @media (max-width: 900px) {
+    body { padding: 18px; }
+    header, .board { grid-template-columns: 1fr; display: grid; }
+    .model-card { min-height: auto; }
+    .model-stage { height: 440px; overflow-x: auto; justify-content: start; }
+    .syringe { min-width: 700px; }
+    .legend { grid-template-columns: 1fr; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <div class="eyebrow">Vocal Logic Lab · Breathing Model</div>
+        <h1>호흡을<br />주사기로 이해하기</h1>
+      </div>
+      <p class="lead">주사기 몸통은 <strong>흉곽</strong>, 피스톤은 <strong>횡격막</strong>으로 봅니다. 피스톤이 움직이면 몸통 안의 공간이 바뀌고, 그 공간 변화가 공기의 유입과 배출을 만듭니다.</p>
+    </header>
+
+    <section class="board">
+      <div class="card model-card">
+        <div class="model-stage">
+          <div class="syringe" id="syringe">
+            <div class="handle"></div>
+            <div class="rod"></div>
+            <div class="barrel"><div class="air"></div></div>
+            <div class="piston"></div>
+            <div class="nozzle"></div>
+            <div class="mouth"></div>
+            <div class="flow" aria-hidden="true"><span></span><span></span><span></span></div>
+
+            <div class="label label-barrel"><strong>주사기 몸통 = 흉곽</strong>공기가 담기는 공간</div>
+            <div class="label label-piston"><strong>피스톤 = 횡격막</strong>공간을 바꾸는 장치</div>
+            <div class="label label-air"><strong>공기량</strong>공간이 커지면 유입</div>
+            <div class="label label-nozzle"><strong>출구 = 성대/입</strong>저항과 배출</div>
+          </div>
+        </div>
+
+        <div class="legend">
+          <div class="legend-item">
+            <b style="color:var(--blue)">흉곽</b>
+            <p>주사기 몸통처럼 공기를 담는 공간. 닫히거나 무너지면 용량이 줄어든다.</p>
+          </div>
+          <div class="legend-item">
+            <b style="color:var(--amber)">횡격막</b>
+            <p>피스톤처럼 움직이며 흉곽 내부 공간을 변화시킨다.</p>
+          </div>
+          <div class="legend-item">
+            <b style="color:var(--green)">호흡 공급</b>
+            <p>공기량 자체보다 필요한 만큼 일정하게 조절하는 능력이 핵심이다.</p>
+          </div>
+        </div>
+      </div>
+
+      <aside class="side">
+        <div class="card panel">
+          <div class="state" id="stateBox">
+            <h3 id="stateTitle">들이마시기: 공간 확장</h3>
+            <p id="stateText">횡격막이 아래로 내려가면 흉곽 안의 공간이 넓어지고, 공기가 안으로 들어옵니다. 이때 옆구리와 윗배가 바깥으로 반응할 수 있습니다.</p>
+          </div>
+        </div>
+
+        <div class="card panel controls">
+          <h2>모형 조작</h2>
+          <div class="buttons">
+            <button class="active" id="inhaleBtn" type="button">들이마시기</button>
+            <button id="exhaleBtn" type="button">내쉬기</button>
+          </div>
+          <label>
+            <span style="display:flex; justify-content:space-between; color:#cbd5e1; font-weight:700; margin-bottom:8px;"><span>피스톤 위치</span><span id="rangeLabel">70%</span></span>
+            <input id="breathRange" type="range" min="20" max="85" value="70" />
+          </label>
+          <p class="note">수업에서는 버튼만 눌러 보여줘도 되고, 슬라이더로 천천히 움직이면서 “공간 변화 → 공기 이동”을 설명하면 됩니다.</p>
+        </div>
+
+        <div class="card panel">
+          <h2>강의용 핵심 문장</h2>
+          <div class="formula">
+            <div class="formula-row"><span class="chip blue">흉곽</span><span>공기가 담기는 주사기 몸통</span></div>
+            <div class="formula-row"><span class="chip amber">횡격막</span><span>공간을 바꾸는 피스톤</span></div>
+            <div class="formula-row"><span class="chip green">호흡</span><span>많이 넣는 것보다 일정하게 조절하는 것</span></div>
+          </div>
+        </div>
+
+        <div class="card panel">
+          <h2>주의해서 설명할 점</h2>
+          <ul>
+            <li>실제 몸은 주사기처럼 딱딱한 기계가 아니라 탄성 있는 구조입니다.</li>
+            <li>이 모형은 해부학 전체가 아니라 “공간 변화와 공기 이동”을 이해하기 위한 비유입니다.</li>
+            <li>노래에서는 마시는 것만큼, 내쉴 때 일정하게 공급하는 컨트롤이 중요합니다.</li>
+          </ul>
+        </div>
+      </aside>
+    </section>
+  </div>
+
+<script>
+  const root = document.documentElement;
+  const range = document.getElementById('breathRange');
+  const rangeLabel = document.getElementById('rangeLabel');
+  const inhaleBtn = document.getElementById('inhaleBtn');
+  const exhaleBtn = document.getElementById('exhaleBtn');
+  const stateTitle = document.getElementById('stateTitle');
+  const stateText = document.getElementById('stateText');
+  const stateBox = document.getElementById('stateBox');
+
+  function setBreath(value) {
+    const v = Number(value);
+    const left = 110 + (85 - v) * 5.2;
+    const airWidth = v;
+    root.style.setProperty('--piston-left', left + 'px');
+    root.style.setProperty('--rod-width', (left + 12) + 'px');
+    root.style.setProperty('--label-piston-left', Math.max(70, left - 42) + 'px');
+    root.style.setProperty('--air-width', airWidth + '%');
+    root.style.setProperty('--flow-opacity', v > 52 ? '.25' : '.8');
+    range.value = v;
+    rangeLabel.textContent = v + '%';
+
+    const inhaling = v >= 55;
+    inhaleBtn.classList.toggle('active', inhaling);
+    exhaleBtn.classList.toggle('active', !inhaling);
+
+    if (inhaling) {
+      stateBox.style.borderLeftColor = 'var(--green)';
+      stateTitle.textContent = '들이마시기: 공간 확장';
+      stateText.textContent = '횡격막이 아래로 내려가면 흉곽 안의 공간이 넓어지고, 공기가 안으로 들어옵니다. 이때 옆구리와 윗배가 바깥으로 반응할 수 있습니다.';
+    } else {
+      stateBox.style.borderLeftColor = 'var(--amber)';
+      stateTitle.textContent = '내쉬기: 공간 조절';
+      stateText.textContent = '횡격막이 올라오고 흉곽 공간이 줄어들면 공기가 밖으로 나갑니다. 노래에서는 이 과정을 한 번에 무너뜨리지 않고 일정하게 조절하는 것이 핵심입니다.';
+    }
+  }
+
+  inhaleBtn.addEventListener('click', () => setBreath(70));
+  exhaleBtn.addEventListener('click', () => setBreath(32));
+  range.addEventListener('input', (e) => setBreath(e.target.value));
+  setBreath(70);
+</script>
+</body>
+</html>
